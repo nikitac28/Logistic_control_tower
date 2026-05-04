@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Supply Chain Control Tower — Wipro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#6A1B9A;--p2:#8B2FC9;--p3:#AB47BC;--pm:#CE93D8;--pl:#F3E5F5;
+  --acc:#E91E8C;--acc2:#F06292;
+  --bg:#F8F7FA;--card:#fff;--border:#E8E4ED;
+  --txt:#1A0A2E;--txt2:#6B5B7A;--txt3:#9B8DAA;
+  --red:#D32F2F;--redl:#FFEBEE;--redm:#EF9A9A;
+  --yel:#F57C00;--yell:#FFF3E0;--yelm:#FFCC80;
+  --grn:#2E7D32;--grnl:#E8F5E9;--grnm:#A5D6A7;
+  --blu:#1565C0;--blul:#E3F2FD;
+  --h:56px;--s:224px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:13px;overflow:hidden;height:100vh}
+#app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+#sidebar{width:var(--s);background:linear-gradient(180deg,#3A0060 0%,#6A1B9A 55%,#8B2FC9 100%);color:#fff;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-icon svg{width:18px;height:18px}
+.sb-logo-text{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;line-height:1.3}
+.sb-logo-sub{font-size:10px;opacity:0.6;font-weight:400}
+.sb-persona{padding:14px 16px 5px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45}
+.sb-section{padding:4px 8px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;font-size:12.5px;font-weight:400;opacity:0.8;margin-bottom:1px;user-select:none}
+.sb-item:hover{background:rgba(255,255,255,0.1);opacity:1}
+.sb-item.active{background:rgba(255,255,255,0.2);opacity:1;font-weight:500}
+.sb-item svg{width:15px;height:15px;flex-shrink:0;opacity:0.85}
+.sb-divider{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:8px 14px}
+.sb-footer{padding:10px 8px 14px}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* TOPBAR */
+#topbar{height:var(--h);background:var(--card);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.tb-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--p);margin-right:6px;white-space:nowrap}
+.tb-filters{display:flex;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none}
+.tb-filters::-webkit-scrollbar{display:none}
+.tb-filter{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--pl);border:1px solid var(--pm);border-radius:20px;font-size:11px;color:var(--p);cursor:pointer;white-space:nowrap;font-weight:500;transition:all 0.15s;user-select:none}
+.tb-filter:hover{background:var(--p);color:#fff;border-color:var(--p)}
+.tb-filter.active{background:var(--p);color:#fff;border-color:var(--p)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-badge{padding:4px 10px;background:var(--redl);color:var(--red);border-radius:20px;font-size:11px;font-weight:700}
+.tb-time{font-size:11px;color:var(--txt3);white-space:nowrap}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;padding:20px}
+
+/* PAGE */
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* LANDING */
+.landing-hero{text-align:center;padding:36px 20px 28px}
+.landing-hero h1{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--p);margin-bottom:8px}
+.landing-hero p{color:var(--txt2);font-size:14px;max-width:560px;margin:0 auto;line-height:1.6}
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:860px;margin:0 auto}
+.persona-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:28px 22px;cursor:pointer;transition:all 0.2s;text-align:center;user-select:none}
+.persona-card:hover{border-color:var(--p);box-shadow:0 6px 24px rgba(106,27,154,0.12);transform:translateY(-3px)}
+.persona-icon{width:64px;height:64px;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+.persona-icon.exec{background:linear-gradient(135deg,#5c1082,#AB47BC)}
+.persona-icon.ops{background:linear-gradient(135deg,#0d47a1,#42A5F5)}
+.persona-icon.sup{background:linear-gradient(135deg,#1b5e20,#66BB6A)}
+.persona-icon svg{width:28px;height:28px;stroke:#fff;fill:none}
+.persona-card h3{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;margin-bottom:6px;color:var(--txt)}
+.persona-card p{font-size:12px;color:var(--txt2);line-height:1.55}
+.persona-tag{display:inline-flex;margin-top:14px;padding:4px 10px;background:var(--pl);color:var(--p);border-radius:20px;font-size:10.5px;font-weight:600}
+.landing-stats{background:var(--card);border:1px solid var(--border);border-radius:12px;max-width:640px;margin:24px auto 0;padding:20px 24px}
+.landing-stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center}
+.ls-val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px}
+.ls-lbl{font-size:10.5px;color:var(--txt3)}
+
+/* PAGE HEADER */
+.page-hd{margin-bottom:18px;display:flex;align-items:flex-end;justify-content:space-between}
+.page-hd-left h2{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--txt);margin-bottom:3px}
+.page-hd-left p{font-size:12px;color:var(--txt2)}
+.page-hd-badge{padding:5px 12px;background:var(--pl);color:var(--p);border-radius:20px;font-size:11px;font-weight:600}
+
+/* KPI GRIDS */
+.kpi-grid{display:grid;gap:12px;margin-bottom:14px}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.kpi.purple::before{background:linear-gradient(90deg,var(--p),var(--acc))}
+.kpi.red::before{background:var(--red)}
+.kpi.green::before{background:var(--grn)}
+.kpi.yellow::before{background:var(--yel)}
+.kpi.blue::before{background:var(--blu)}
+.kpi-label{font-size:10.5px;color:var(--txt3);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-val{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--txt);margin-bottom:4px;line-height:1}
+.kpi-sub{font-size:11px;display:flex;align-items:center;gap:3px}
+.up{color:var(--grn)}.down{color:var(--red)}.neutral{color:var(--txt3)}
+
+/* PANELS */
+.row{display:grid;gap:14px;margin-bottom:14px}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:1fr 1fr 1fr}
+.r23{grid-template-columns:2fr 3fr}
+.r13{grid-template-columns:1fr 3fr}
+.r13b{grid-template-columns:1fr 2fr 1fr}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.panel-title{font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;color:var(--txt)}
+.pbadge{font-size:10px;padding:3px 8px;border-radius:12px;font-weight:600}
+.pb-red{background:var(--redl);color:var(--red)}
+.pb-yel{background:var(--yell);color:var(--yel)}
+.pb-grn{background:var(--grnl);color:var(--grn)}
+.pb-pur{background:var(--pl);color:var(--p)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1.5px solid var(--border)}
+.tbl td{padding:8px 10px;border-bottom:1px solid #F5F3F8;color:var(--txt);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:#FAF8FC}
+
+/* STATUS CHIPS */
+.st{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:12px}
+.st-high{background:var(--redl);color:var(--red)}
+.st-med{background:var(--yell);color:var(--yel)}
+.st-low{background:var(--grnl);color:var(--grn)}
+.st-info{background:var(--pl);color:var(--p)}
+.st-delayed{background:var(--redl);color:var(--red)}
+.st-transit{background:var(--blul);color:var(--blu)}
+.st-ontime{background:var(--grnl);color:var(--grn)}
+.st-pending{background:#FFF8E1;color:#F9A825}
+.st-done{background:var(--grnl);color:var(--grn)}
+.st-prog{background:var(--blul);color:var(--blu)}
+
+/* RISK BAR */
+.rbar{height:6px;border-radius:3px;background:#EEE;overflow:hidden;margin-top:5px}
+.rf{height:100%;border-radius:3px;transition:width 0.5s ease}
+.rf-r{background:var(--red)}.rf-y{background:var(--yel)}.rf-g{background:var(--grn)}.rf-p{background:var(--p)}
+
+/* ALERT ITEMS */
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.alert-item:last-child{border-bottom:none}
+.adot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.a-title{font-size:12.5px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.a-sub{font-size:11px;color:var(--txt3)}
+
+/* ACTION CARDS */
+.acard{border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:10px}
+.acard.crit{border-left:3px solid var(--red)}
+.acard.warn{border-left:3px solid var(--yel)}
+.acard.ok{border-left:3px solid var(--grn)}
+.acard-title{font-size:12.5px;font-weight:600;color:var(--txt);margin-bottom:5px}
+.acard-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.atag{font-size:10.5px;padding:2px 7px;border-radius:10px;background:var(--pl);color:var(--p);font-weight:500}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:'';position:absolute;left:7px;top:5px;bottom:5px;width:1px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-dot{position:absolute;left:-19px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--border)}
+.tl-title{font-size:12.5px;font-weight:500;color:var(--txt)}
+.tl-time{font-size:10.5px;color:var(--txt3);margin-top:2px}
+
+/* MINI METRICS */
+.mm{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.mm:last-child{border-bottom:none}
+.mm-lbl{font-size:12px;color:var(--txt2)}
+.mm-val{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600}
+
+/* SUPPLIER ROW */
+.sup-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.sup-row:last-child{border-bottom:none}
+.sup-av{width:30px;height:30px;border-radius:8px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--p);flex-shrink:0}
+
+/* SECTION LABEL */
+.slbl{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px}
+
+/* FILTER CHIPS */
+.fchip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:var(--p);color:#fff;border-radius:20px;font-size:11px;font-weight:500;margin:2px}
+
+/* WORLD MAP */
+.wmap{background:linear-gradient(135deg,#EDE7F6 0%,#F3E5F5 100%);border-radius:10px;overflow:hidden;position:relative}
+
+/* PROGRESS */
+.pbar{height:8px;background:#EEE;border-radius:4px;overflow:hidden}
+.pfill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--p),var(--acc))}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--pm);border-radius:3px}
+</style>
+</head>
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzMx1xDEX3JecX1Z4wgBr7hkRVp0d0OhABe2NXY2GFNEsBd_QUWzMZEglbT7T-T2eXKSQ/exec";
+
+async function loadDashboardData() {
+
+  try {
+
+    const response = await fetch(API_URL);
+
+    const data = await response.json();
+
+    console.log("Shipment Data:", data);
+
+    // Count delayed shipments
+    const delayedShipments =
+      data.filter(
+        shipment =>
+          shipment.Status === "Delayed"
+      ).length;
+
+    // Update dashboard
+    document.getElementById(
+      "delayed-count"
+    ).innerText = delayedShipments;
+
+  }
+
+  catch(error) {
+
+    console.error(
+      "Error loading data:",
+      error
+    );
+
+  }
+
+}
+
+loadDashboardData();
+
+setInterval(loadDashboardData, 30000);
+
+</script>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="sb-logo-text">Control Tower</div>
+      <div class="sb-logo-sub">AI Supply Chain · Wipro</div>
+    </div>
+  </div>
+  <div class="sb-section" style="padding-top:10px">
+    <div class="sb-item active" onclick="showPage('landing')" id="nav-landing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Home
+    </div>
+  </div>
+
+  <div id="exec-nav" style="display:none">
+    <div class="sb-persona">Executive</div>
+    <div class="sb-section">
+      <div class="sb-item" onclick="showPage('exec-main')" id="nav-exec-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Main Dashboard</div>
+      <div class="sb-item" onclick="showPage('exec-global')" id="nav-exec-global"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Global View</div>
+      <div class="sb-item" onclick="showPage('exec-finance')" id="nav-exec-finance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial Impact</div>
+      <div class="sb-item" onclick="showPage('exec-ops')" id="nav-exec-ops"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Ops Performance</div>
+      <div class="sb-item" onclick="showPage('exec-predict')" id="nav-exec-predict"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Predictive Insights</div>
+    </div>
+  </div>
+
+  <div id="ops-nav" style="display:none">
+    <div class="sb-persona">Operations</div>
+    <div class="sb-section">
+      <div class="sb-item" onclick="showPage('ops-main')" id="nav-ops-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Control Panel</div>
+      <div class="sb-item" onclick="showPage('ops-exceptions')" id="nav-ops-exceptions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Exception Mgmt</div>
+      <div class="sb-item" onclick="showPage('ops-risk')" id="nav-ops-risk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Risk Overview</div>
+      <div class="sb-item" onclick="showPage('ops-shipments')" id="nav-ops-shipments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Shipment Tracking</div>
+      <div class="sb-item" onclick="showPage('ops-actions')" id="nav-ops-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Actions</div>
+    </div>
+  </div>
+
+  <div id="sup-nav" style="display:none">
+    <div class="sb-persona">Support</div>
+    <div class="sb-section">
+      <div class="sb-item" onclick="showPage('sup-finance')" id="nav-sup-finance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Finance View</div>
+      <div class="sb-item" onclick="showPage('sup-cs')" id="nav-sup-cs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Customer Service</div>
+      <div class="sb-item" onclick="showPage('sup-overview')" id="nav-sup-overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>Support Overview</div>
+    </div>
+  </div>
+
+  <hr class="sb-divider" style="margin-top:auto">
+  <div class="sb-footer">
+    <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>Admin User</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <span class="tb-title" id="tb-title">AI Control Tower</span>
+    <div class="tb-filters">
+      <div class="tb-filter active" onclick="toggleFilter(this)">All Regions</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">North America</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">Europe</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">Asia</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">All Warehouses</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">All Suppliers</div>
+      <div class="tb-filter" onclick="toggleFilter(this)">Apr 2026</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-badge">
+  <span id="delayed-count">0</span> Delayed
+</div>
+      <div class="tb-time">Apr 28, 2026 · 09:42 AM</div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- =========== LANDING =========== -->
+    <div class="page active" id="page-landing">
+      <div class="landing-hero">
+        <h1>AI Supply Chain Control Tower</h1>
+        <p>Real-time visibility, predictive intelligence, and autonomous action across your global supply chain. Select your role to get started.</p>
+      </div>
+      <div class="persona-grid">
+        <div class="persona-card" onclick="selectPersona('exec')">
+          <div class="persona-icon exec"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+          <h3>Executive Dashboard</h3>
+          <p>Strategic overview for CXOs — KPIs, financial impact, predictive risk signals, and AI-recommended actions.</p>
+          <div class="persona-tag">CEO · CFO · COO · CSCO</div>
+        </div>
+        <div class="persona-card" onclick="selectPersona('ops')">
+          <div class="persona-icon ops"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <h3>Daily Operations</h3>
+          <p>Live exception queues, shipment tracking, supplier alerts, and action management for operational teams.</p>
+          <div class="persona-tag">Planner · Logistics · Procurement</div>
+        </div>
+        <div class="persona-card" onclick="selectPersona('sup')">
+          <div class="persona-icon sup"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Support Dashboard</h3>
+          <p>Finance tracking, customer service order status, and cross-functional performance visibility.</p>
+          <div class="persona-tag">Finance · Customer Service · Support</div>
+        </div>
+      </div>
+      <div class="landing-stats">
+        <div class="slbl" style="text-align:center;margin-bottom:14px">Live Data Summary — Apr 2026</div>
+        <div class="landing-stats-grid">
+          <div><div class="ls-val" style="color:var(--p)">100</div><div class="ls-lbl">Orders</div></div>
+          <div><div class="ls-val" style="color:var(--red)">44</div><div class="ls-lbl">Delayed</div></div>
+          <div><div class="ls-val" style="color:var(--yel)">40</div><div class="ls-lbl">High Risk Suppliers</div></div>
+          <div><div class="ls-val" style="color:var(--grn)">$717K</div><div class="ls-lbl">Order Value</div></div>
+          <div><div class="ls-val" style="color:var(--p)">150</div><div class="ls-lbl">SKUs Tracked</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== EXEC MAIN =========== -->
+    <div class="page" id="page-exec-main">
+      <div class="page-hd"><div class="page-hd-left"><h2>Executive Dashboard</h2><p>AI-generated summary · Apr 28, 2026 · Updated 9:42 AM</p></div><span class="page-hd-badge">CXO View</span></div>
+      <div class="kpi-grid g5">
+        <div class="kpi purple"><div class="kpi-label">OTIF %</div><div class="kpi-val">56%</div><div class="kpi-sub down">↓ 18pts vs 74% target</div></div>
+        <div class="kpi red"><div class="kpi-label">Revenue at Risk</div><div class="kpi-val">$214K</div><div class="kpi-sub down">↑ 32% week-on-week</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Logistics Cost</div><div class="kpi-val">$89K</div><div class="kpi-sub up">↓ 4% vs budget</div></div>
+        <div class="kpi red"><div class="kpi-label">Premium Freight %</div><div class="kpi-val">22%</div><div class="kpi-sub down">↑ 7pts vs 15% target</div></div>
+        <div class="kpi green"><div class="kpi-label">Inventory Health</div><div class="kpi-val">68%</div><div class="kpi-sub neutral">32 SKUs at stockout risk</div></div>
+      </div>
+      <div class="row r2">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Risk by Region</span><span class="pbadge pb-red">3 High Risk Zones</span></div>
+          <div style="height:170px"><canvas id="riskRegionChart"></canvas></div>
+          <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--txt3)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>High (Asia: 22, EU: 14)</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--yel);display:inline-block"></span>Medium (N.Am: 8)</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">AI Predictive Insights</span><span class="pbadge pb-pur">Powered by AI</span></div>
+          <div class="alert-item"><div class="adot" style="background:var(--red)"></div><div><div class="a-title">WH_NY → Asia: 88% delay probability</div><div class="a-sub">Port congestion + geopolitical event · 3 shipments impacted</div></div></div>
+          <div class="alert-item"><div class="adot" style="background:var(--red)"></div><div><div class="a-title">SUP_B reliability at 70% — critical threshold</div><div class="a-sub">12 SKUs at risk · Switch to SUP_D recommended immediately</div></div></div>
+          <div class="alert-item"><div class="adot" style="background:var(--red)"></div><div><div class="a-title">SKU_3 stockout in 4 days at WH_NY</div><div class="a-sub">Stock: 2 units · Safety stock: 156 · Emergency reorder required</div></div></div>
+          <div class="alert-item"><div class="adot" style="background:var(--yel)"></div><div><div class="a-title">Asia geopolitical event — High impact</div><div class="a-sub">37 orders in affected corridor · Apr 8 event active</div></div></div>
+        </div>
+      </div>
+      <div class="row r2">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Recommended Actions</span></div>
+          <table class="tbl">
+            <thead><tr><th>Action</th><th>Owner</th><th>Status</th><th>Impact</th></tr></thead>
+            <tbody>
+              <tr><td>Reroute 3 Asia shipments via air</td><td>Logistics</td><td><span class="st st-pending">Pending</span></td><td style="color:var(--red);font-weight:700">$28K</td></tr>
+              <tr><td>Expedite reorder SKU_3 (WH_NY)</td><td>Procurement</td><td><span class="st st-prog">In Progress</span></td><td style="color:var(--yel);font-weight:700">$8K</td></tr>
+              <tr><td>Switch SUP_B → SUP_D for SKU_2</td><td>SCM Team</td><td><span class="st st-pending">Pending</span></td><td style="color:var(--red);font-weight:700">$41K</td></tr>
+              <tr><td>Pre-position inventory WH_LA</td><td>Planner</td><td><span class="st st-done">Done</span></td><td style="color:var(--grn);font-weight:700">$12K saved</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Financial Impact Summary</span></div>
+          <div style="height:170px"><canvas id="finImpactChart"></canvas></div>
+        </div>
+      </div>
+      <div class="row r3">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">OTIF % Trend</span></div><div style="height:100px"><canvas id="otifTrend"></canvas></div></div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Exception Count</span></div><div style="height:100px"><canvas id="excTrend"></canvas></div></div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Logistics Cost ($K)</span></div><div style="height:100px"><canvas id="costTrend"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- =========== EXEC GLOBAL =========== -->
+    <div class="page" id="page-exec-global">
+      <div class="page-hd"><div class="page-hd-left"><h2>Global Supply Chain View</h2><p>Live network status across all nodes, corridors, and external events</p></div></div>
+      <div class="row r23">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Network Legend</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div><span style="font-size:12px">High risk node</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--yel)"></div><span style="font-size:12px">Medium risk</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--grn)"></div><span style="font-size:12px">On track</span></div>
+          </div>
+          <div class="slbl">Warehouse Nodes</div>
+          <table class="tbl"><thead><tr><th>Node</th><th>Region</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr><td>WH_NY</td><td>N. America</td><td><span class="st st-high">High</span></td></tr>
+            <tr><td>WH_CA</td><td>N. America</td><td><span class="st st-med">Medium</span></td></tr>
+            <tr><td>WH_TX</td><td>N. America</td><td><span class="st st-low">Low</span></td></tr>
+            <tr><td>WH_EU1</td><td>Europe</td><td><span class="st st-high">High</span></td></tr>
+            <tr><td>WH_AS1</td><td>Asia</td><td><span class="st st-high">High</span></td></tr>
+          </tbody></table>
+          <div class="slbl" style="margin-top:14px">Active External Events</div>
+          <table class="tbl"><thead><tr><th>Event</th><th>Region</th><th>Impact</th></tr></thead>
+          <tbody>
+            <tr><td>Port Congestion</td><td>Europe</td><td><span class="st st-high">High</span></td></tr>
+            <tr><td>Geopolitical</td><td>Asia</td><td><span class="st st-high">High</span></td></tr>
+            <tr><td>Strike</td><td>N. America</td><td><span class="st st-med">Medium</span></td></tr>
+            <tr><td>Weather</td><td>Europe</td><td><span class="st st-high">High</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Global Shipment Network Map</span><span class="pbadge pb-red">8 disrupted routes</span></div>
+          <div class="wmap" style="height:300px">
+            <svg viewBox="0 0 600 280" width="100%" height="100%">
+              <defs>
+                <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(106,27,154,0.6)"/></marker>
+                <marker id="arr-r" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(211,47,47,0.8)"/></marker>
+                <marker id="arr-g" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(46,125,50,0.7)"/></marker>
+              </defs>
+              <!-- Region blobs -->
+              <rect x="40" y="60" width="160" height="110" rx="12" fill="rgba(106,27,154,0.05)" stroke="rgba(106,27,154,0.12)" stroke-width="1.5"/>
+              <text x="120" y="125" text-anchor="middle" font-size="11" fill="rgba(106,27,154,0.55)" font-weight="700" font-family="DM Sans, sans-serif">NORTH AMERICA</text>
+              <rect x="220" y="48" width="130" height="115" rx="12" fill="rgba(106,27,154,0.05)" stroke="rgba(106,27,154,0.12)" stroke-width="1.5"/>
+              <text x="285" y="115" text-anchor="middle" font-size="11" fill="rgba(106,27,154,0.55)" font-weight="700" font-family="DM Sans, sans-serif">EUROPE</text>
+              <rect x="380" y="52" width="175" height="120" rx="12" fill="rgba(106,27,154,0.05)" stroke="rgba(106,27,154,0.12)" stroke-width="1.5"/>
+              <text x="467" y="120" text-anchor="middle" font-size="11" fill="rgba(106,27,154,0.55)" font-weight="700" font-family="DM Sans, sans-serif">ASIA</text>
+              <!-- Shipment routes -->
+              <path d="M100 95 Q165 70 250 88" stroke="rgba(211,47,47,0.7)" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#arr-r)"/>
+              <path d="M100 100 Q260 50 415 85" stroke="rgba(211,47,47,0.8)" stroke-width="2.5" fill="none" stroke-dasharray="7,4" marker-end="url(#arr-r)"/>
+              <path d="M130 112 Q200 100 250 108" stroke="rgba(106,27,154,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+              <path d="M255 95 Q335 78 415 88" stroke="rgba(245,124,0,0.7)" stroke-width="2" fill="none" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+              <path d="M85 118 Q170 150 255 128" stroke="rgba(46,125,50,0.65)" stroke-width="1.5" fill="none" marker-end="url(#arr-g)"/>
+              <!-- Warehouse nodes -->
+              <circle cx="100" cy="88" r="9" fill="#D32F2F" stroke="white" stroke-width="2.5"/>
+              <text x="100" y="110" text-anchor="middle" font-size="9.5" fill="#3A0060" font-weight="700" font-family="DM Sans,sans-serif">WH_NY</text>
+              <circle cx="130" cy="115" r="7" fill="#F57C00" stroke="white" stroke-width="2"/>
+              <text x="130" y="135" text-anchor="middle" font-size="9" fill="#3A0060" font-weight="600" font-family="DM Sans,sans-serif">WH_CA</text>
+              <circle cx="75" cy="125" r="7" fill="#2E7D32" stroke="white" stroke-width="2"/>
+              <text x="75" y="145" text-anchor="middle" font-size="9" fill="#3A0060" font-weight="600" font-family="DM Sans,sans-serif">WH_TX</text>
+              <circle cx="255" cy="82" r="9" fill="#D32F2F" stroke="white" stroke-width="2.5"/>
+              <text x="255" y="68" text-anchor="middle" font-size="9.5" fill="#3A0060" font-weight="700" font-family="DM Sans,sans-serif">WH_EU1</text>
+              <circle cx="415" cy="82" r="9" fill="#D32F2F" stroke="white" stroke-width="2.5"/>
+              <text x="415" y="68" text-anchor="middle" font-size="9.5" fill="#3A0060" font-weight="700" font-family="DM Sans,sans-serif">WH_AS1</text>
+              <circle cx="470" cy="100" r="7" fill="#F57C00" stroke="white" stroke-width="2"/>
+              <circle cx="445" cy="128" r="6" fill="#2E7D32" stroke="white" stroke-width="2"/>
+              <!-- Legend bar -->
+              <rect x="30" y="220" width="540" height="36" rx="6" fill="rgba(255,255,255,0.7)"/>
+              <circle cx="52" cy="238" r="5" fill="#D32F2F"/><text x="62" y="242" font-size="9" fill="#6B5B7A" font-family="DM Sans,sans-serif">High Risk Node</text>
+              <circle cx="148" cy="238" r="5" fill="#F57C00"/><text x="158" y="242" font-size="9" fill="#6B5B7A" font-family="DM Sans,sans-serif">Medium Risk</text>
+              <circle cx="234" cy="238" r="5" fill="#2E7D32"/><text x="244" y="242" font-size="9" fill="#6B5B7A" font-family="DM Sans,sans-serif">On Track</text>
+              <line x1="310" y1="238" x2="330" y2="238" stroke="rgba(211,47,47,0.8)" stroke-width="2" stroke-dasharray="4,3"/><text x="334" y="242" font-size="9" fill="#6B5B7A" font-family="DM Sans,sans-serif">Disrupted Route</text>
+              <line x1="430" y1="238" x2="450" y2="238" stroke="rgba(46,125,50,0.7)" stroke-width="1.5"/><text x="454" y="242" font-size="9" fill="#6B5B7A" font-family="DM Sans,sans-serif">Clear Route</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="row r3">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">North America</span><span class="pbadge pb-yel">Medium Risk</span></div>
+          <div class="mm"><span class="mm-lbl">On Time Shipments</span><span class="mm-val" style="color:var(--yel)">18/31</span></div>
+          <div class="mm"><span class="mm-lbl">Active Exceptions</span><span class="mm-val" style="color:var(--red)">8</span></div>
+          <div class="mm"><span class="mm-lbl">Revenue at Risk</span><span class="mm-val">$62K</span></div>
+          <div class="mm"><span class="mm-lbl">Strike Event</span><span class="mm-val" style="color:var(--yel)">Medium Impact</span></div>
+        </div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Europe</span><span class="pbadge pb-red">High Risk</span></div>
+          <div class="mm"><span class="mm-lbl">On Time Shipments</span><span class="mm-val" style="color:var(--red)">12/32</span></div>
+          <div class="mm"><span class="mm-lbl">Active Exceptions</span><span class="mm-val" style="color:var(--red)">14</span></div>
+          <div class="mm"><span class="mm-lbl">Revenue at Risk</span><span class="mm-val">$84K</span></div>
+          <div class="mm"><span class="mm-lbl">Port Congestion + Weather</span><span class="mm-val" style="color:var(--red)">High Impact</span></div>
+        </div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Asia</span><span class="pbadge pb-red">Critical Risk</span></div>
+          <div class="mm"><span class="mm-lbl">On Time Shipments</span><span class="mm-val" style="color:var(--red)">8/37</span></div>
+          <div class="mm"><span class="mm-lbl">Active Exceptions</span><span class="mm-val" style="color:var(--red)">22</span></div>
+          <div class="mm"><span class="mm-lbl">Revenue at Risk</span><span class="mm-val">$68K</span></div>
+          <div class="mm"><span class="mm-lbl">Geopolitical Event</span><span class="mm-val" style="color:var(--red)">High Impact</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== EXEC FINANCE =========== -->
+    <div class="page" id="page-exec-finance">
+      <div class="page-hd"><div class="page-hd-left"><h2>Financial Impact — CFO View</h2><p>Cost analysis, disruption economics, and AI-action ROI</p></div><span class="page-hd-badge">CFO</span></div>
+      <div class="kpi-grid g4">
+        <div class="kpi purple"><div class="kpi-label">Total Logistics Cost MTD</div><div class="kpi-val">$89K</div><div class="kpi-sub up">↓ 4% vs budget of $93K</div></div>
+        <div class="kpi red"><div class="kpi-label">Disruption Cost</div><div class="kpi-val">$47K</div><div class="kpi-sub down">↑ 28% vs prior period</div></div>
+        <div class="kpi green"><div class="kpi-label">AI-Action Savings</div><div class="kpi-val">$23K</div><div class="kpi-sub up">↑ $8K from 4 actions</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Premium Freight Cost</div><div class="kpi-val">$19.6K</div><div class="kpi-sub down">22% of total freight</div></div>
+      </div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Cost Breakdown vs Budget</span></div><div style="height:200px"><canvas id="costBreakChart"></canvas></div></div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">With AI Action vs Without</span></div><div style="height:200px"><canvas id="actionCompChart"></canvas></div></div>
+      </div>
+      <div class="panel"><div class="panel-hd"><span class="panel-title">8-Week Cost Trend</span></div><div style="height:150px"><canvas id="costTrendLong"></canvas></div></div>
+      <div class="row r2" style="margin-top:14px">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Savings Pipeline</span></div>
+          <table class="tbl"><thead><tr><th>Initiative</th><th>Savings</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>WH_LA repositioning</td><td style="color:var(--grn);font-weight:700">$12K</td><td>Inventory</td><td><span class="st st-done">Realized</span></td></tr>
+            <tr><td>Route optimization</td><td style="color:var(--grn);font-weight:700">$7K</td><td>Logistics</td><td><span class="st st-done">Realized</span></td></tr>
+            <tr><td>Supplier switch (SUP_D)</td><td style="color:var(--p);font-weight:700">$41K</td><td>Procurement</td><td><span class="st st-pending">Projected</span></td></tr>
+            <tr><td>Air freight reroute avoided</td><td style="color:var(--p);font-weight:700">$28K</td><td>Logistics</td><td><span class="st st-pending">Projected</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Platform ROI</span></div>
+          <div style="text-align:center;padding:20px 0">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:48px;font-weight:700;color:var(--p)">3.2×</div>
+            <div style="font-size:13px;color:var(--txt2);margin-top:6px">Return on Investment</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:4px">$23K savings / $7.2K platform cost</div>
+            <div style="margin-top:16px;display:flex;justify-content:center;gap:20px">
+              <div><div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--grn)">$23K</div><div style="font-size:10.5px;color:var(--txt3)">Realized</div></div>
+              <div><div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--p)">$69K</div><div style="font-size:10.5px;color:var(--txt3)">Projected</div></div>
+              <div><div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--yel)">$47K</div><div style="font-size:10.5px;color:var(--txt3)">Disruption cost</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== EXEC OPS =========== -->
+    <div class="page" id="page-exec-ops">
+      <div class="page-hd"><div class="page-hd-left"><h2>Operational Performance — COO View</h2><p>SLA adherence, resolution times, and bottleneck analysis</p></div><span class="page-hd-badge">COO</span></div>
+      <div class="kpi-grid g3">
+        <div class="kpi purple"><div class="kpi-label">SLA Adherence</div><div class="kpi-val">61%</div><div class="kpi-sub down">Target: 95% · -34pts gap</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Avg Resolution Time</div><div class="kpi-val">4.2h</div><div class="kpi-sub up">↓ 0.8h vs last week</div></div>
+        <div class="kpi green"><div class="kpi-label">Throughput Index</div><div class="kpi-val">89%</div><div class="kpi-sub up">↑ 3pts month-on-month</div></div>
+      </div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Exception Type Distribution</span></div><div style="height:200px"><canvas id="excTypeChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Bottleneck Analysis</span></div>
+          <div style="padding:4px 0">
+            <div class="mm"><span class="mm-lbl">WH_NY → Asia corridor</span><span class="mm-val" style="color:var(--red)">Critical · 88%</span></div>
+            <div class="rbar"><div class="rf rf-r" style="width:88%"></div></div>
+            <div class="mm" style="margin-top:10px"><span class="mm-lbl">Europe port congestion</span><span class="mm-val" style="color:var(--red)">High · 74%</span></div>
+            <div class="rbar"><div class="rf rf-r" style="width:74%"></div></div>
+            <div class="mm" style="margin-top:10px"><span class="mm-lbl">SUP_B reliability issue</span><span class="mm-val" style="color:var(--yel)">Medium · 55%</span></div>
+            <div class="rbar"><div class="rf rf-y" style="width:55%"></div></div>
+            <div class="mm" style="margin-top:10px"><span class="mm-lbl">WH_TX road freight</span><span class="mm-val" style="color:var(--grn)">Low · 18%</span></div>
+            <div class="rbar"><div class="rf rf-g" style="width:18%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-hd"><span class="panel-title">Resolution Time by Exception Type (hours)</span></div><div style="height:130px"><canvas id="resTimeChart"></canvas></div></div>
+    </div>
+
+    <!-- =========== EXEC PREDICT =========== -->
+    <div class="page" id="page-exec-predict">
+      <div class="page-hd"><div class="page-hd-left"><h2>Predictive Insights — CSCO View</h2><p>AI-powered forecasting for next 14 days based on live data</p></div><span class="page-hd-badge">CSCO</span></div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Delay Probability by Route (%)</span></div><div style="height:200px"><canvas id="delayProbChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Supplier Risk Forecast</span></div>
+          <div class="sup-row"><div class="sup-av">B</div><div style="flex:1"><div style="font-size:12.5px;font-weight:500">SUP_B</div><div style="font-size:11px;color:var(--txt3)">70% reliability · 12 SKUs</div></div><span class="st st-high">High Risk</span></div>
+          <div class="sup-row"><div class="sup-av">C</div><div style="flex:1"><div style="font-size:12.5px;font-weight:500">SUP_C</div><div style="font-size:11px;color:var(--txt3)">76% reliability · 9 SKUs</div></div><span class="st st-high">High Risk</span></div>
+          <div class="sup-row"><div class="sup-av">A</div><div style="flex:1"><div style="font-size:12.5px;font-weight:500">SUP_A</div><div style="font-size:11px;color:var(--txt3)">88% reliability · 14 SKUs</div></div><span class="st st-med">Medium</span></div>
+          <div class="sup-row"><div class="sup-av">D</div><div style="flex:1"><div style="font-size:12.5px;font-weight:500">SUP_D</div><div style="font-size:11px;color:var(--txt3)">92% reliability · Recommended</div></div><span class="st st-low">Low Risk</span></div>
+          <div class="sup-row"><div class="sup-av">E</div><div style="flex:1"><div style="font-size:12.5px;font-weight:500">SUP_E</div><div style="font-size:11px;color:var(--txt3)">96% reliability · Preferred</div></div><span class="st st-low">Low Risk</span></div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-hd"><span class="panel-title">Inventory Risk Forecast — Apr 28 to May 11</span><span class="pbadge pb-red">8 stockout risks detected</span></div><div style="height:170px"><canvas id="invRiskChart"></canvas></div></div>
+    </div>
+
+    <!-- =========== OPS MAIN =========== -->
+    <div class="page" id="page-ops-main">
+      <div class="page-hd"><div class="page-hd-left"><h2>Operations Control Panel</h2><p>Live exception queue, shipment status, and prioritized alerts</p></div></div>
+      <div class="row r13b">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Exception Queue</span><span class="pbadge pb-red">14 critical</span></div>
+          <table class="tbl">
+            <thead><tr><th>Sev</th><th>Type</th><th>SLA</th></tr></thead>
+            <tbody>
+              <tr><td><span class="st st-high">High</span></td><td>Delay</td><td style="color:var(--red);font-weight:700">0.5h</td></tr>
+              <tr><td><span class="st st-high">High</span></td><td>Stockout</td><td style="color:var(--red);font-weight:700">2h</td></tr>
+              <tr><td><span class="st st-high">High</span></td><td>Supplier</td><td style="color:var(--red);font-weight:700">3h</td></tr>
+              <tr><td><span class="st st-med">Med</span></td><td>Delay</td><td style="color:var(--yel);font-weight:700">6h</td></tr>
+              <tr><td><span class="st st-med">Med</span></td><td>Transit</td><td style="color:var(--yel);font-weight:700">8h</td></tr>
+              <tr><td><span class="st st-med">Med</span></td><td>Inventory</td><td style="color:var(--yel);font-weight:700">12h</td></tr>
+              <tr><td><span class="st st-low">Low</span></td><td>Route</td><td style="color:var(--grn);font-weight:700">24h</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Live Shipment Tracking</span></div>
+          <table class="tbl">
+            <thead><tr><th>ID</th><th>Route</th><th>Carrier</th><th>Mode</th><th>ETA Plan</th><th>AI Predicted</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>2001</td><td>WH_TX→Asia</td><td>Maersk</td><td>Road</td><td>Apr 8</td><td>Apr 8</td><td><span class="st st-ontime">On Time</span></td></tr>
+              <tr><td>2002</td><td>WH_NY→Asia</td><td>UPS</td><td>Air</td><td>Apr 12</td><td><span style="color:var(--yel)">Apr 13</span></td><td><span class="st st-transit">In Transit</span></td></tr>
+              <tr style="background:#FFF5F5"><td>2003</td><td>WH_CA→Asia</td><td>UPS</td><td>Air</td><td>Apr 15</td><td><span style="color:var(--red)">Apr 17 +2d</span></td><td><span class="st st-delayed">Delayed</span></td></tr>
+              <tr style="background:#FFF5F5"><td>2004</td><td>WH_CA→Asia</td><td>UPS</td><td>Sea</td><td>Apr 7</td><td><span style="color:var(--red)">Apr 8 +1d</span></td><td><span class="st st-delayed">Delayed</span></td></tr>
+              <tr><td>2005</td><td>WH_NY→EU</td><td>Maersk</td><td>Road</td><td>Apr 10</td><td>Apr 10</td><td><span class="st st-ontime">On Time</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Priority Alerts</span></div>
+          <div class="acard crit"><div class="acard-title">SKU_3: Critical stock depletion</div><div class="acard-meta"><span class="atag">WH_NY</span><span style="font-size:11px;color:var(--red);font-weight:600">Immediate</span></div></div>
+          <div class="acard crit"><div class="acard-title">SHP-2003 delayed +2 days</div><div class="acard-meta"><span class="atag">Asia route</span><span style="font-size:11px;color:var(--red);font-weight:600">Urgent</span></div></div>
+          <div class="acard warn"><div class="acard-title">SUP_B reliability at 70%</div><div class="acard-meta"><span class="atag">12 SKUs</span><span style="font-size:11px;color:var(--yel);font-weight:600">Today</span></div></div>
+          <div class="acard warn"><div class="acard-title">Port congestion Rotterdam</div><div class="acard-meta"><span class="atag">Europe</span><span style="font-size:11px;color:var(--yel);font-weight:600">Monitor</span></div></div>
+        </div>
+      </div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Stockout Alerts</span><span class="pbadge pb-red">8 at risk</span></div>
+          <table class="tbl"><thead><tr><th>SKU</th><th>Warehouse</th><th>Stock</th><th>Safety Stock</th><th>Days Left</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr style="background:#FFF5F5"><td>SKU_3</td><td>WH_NY</td><td style="color:var(--red);font-weight:700">2</td><td>156</td><td style="color:var(--red);font-weight:700">&lt;1</td><td><span class="st st-high">Critical</span></td></tr>
+            <tr><td>SKU_5</td><td>WH_NY</td><td style="color:var(--yel);font-weight:700">112</td><td>74</td><td style="color:var(--yel);font-weight:700">3</td><td><span class="st st-med">Watch</span></td></tr>
+            <tr><td>SKU_2</td><td>WH_NY</td><td style="color:var(--yel);font-weight:700">256</td><td>150</td><td style="color:var(--yel);font-weight:700">7</td><td><span class="st st-med">Watch</span></td></tr>
+            <tr><td>SKU_1</td><td>WH_NY</td><td style="color:var(--grn);font-weight:700">774</td><td>72</td><td style="color:var(--grn)">30+</td><td><span class="st st-low">OK</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Supplier Reliability Monitor</span></div>
+          <div class="sup-row"><div class="sup-av">A</div><div style="font-size:12.5px;font-weight:500;width:60px">SUP_A</div><div class="rbar" style="flex:1;margin:0 10px"><div class="rf rf-g" style="width:88%"></div></div><span style="font-size:12px;font-weight:700;min-width:36px">88%</span><span class="st st-med" style="margin-left:6px">Med</span></div>
+          <div class="sup-row"><div class="sup-av">B</div><div style="font-size:12.5px;font-weight:500;width:60px">SUP_B</div><div class="rbar" style="flex:1;margin:0 10px"><div class="rf rf-r" style="width:70%"></div></div><span style="font-size:12px;font-weight:700;min-width:36px">70%</span><span class="st st-high" style="margin-left:6px">High</span></div>
+          <div class="sup-row"><div class="sup-av">C</div><div style="font-size:12.5px;font-weight:500;width:60px">SUP_C</div><div class="rbar" style="flex:1;margin:0 10px"><div class="rf rf-r" style="width:76%"></div></div><span style="font-size:12px;font-weight:700;min-width:36px">76%</span><span class="st st-high" style="margin-left:6px">High</span></div>
+          <div class="sup-row"><div class="sup-av">D</div><div style="font-size:12.5px;font-weight:500;width:60px">SUP_D</div><div class="rbar" style="flex:1;margin:0 10px"><div class="rf rf-g" style="width:92%"></div></div><span style="font-size:12px;font-weight:700;min-width:36px">92%</span><span class="st st-low" style="margin-left:6px">Low</span></div>
+          <div class="sup-row"><div class="sup-av">E</div><div style="font-size:12.5px;font-weight:500;width:60px">SUP_E</div><div class="rbar" style="flex:1;margin:0 10px"><div class="rf rf-g" style="width:96%"></div></div><span style="font-size:12px;font-weight:700;min-width:36px">96%</span><span class="st st-low" style="margin-left:6px">Low</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== OPS EXCEPTIONS =========== -->
+    <div class="page" id="page-ops-exceptions">
+      <div class="page-hd"><div class="page-hd-left"><h2>Exception Management</h2><p>Full exception log with SLA tracking and owner assignments</p></div></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span class="slbl" style="margin:0">Filters:</span>
+        <span class="fchip">All Types</span><span class="fchip">All Regions</span>
+        <div class="tb-filter" onclick="toggleFilter(this)" style="border-radius:20px">Delay</div>
+        <div class="tb-filter" onclick="toggleFilter(this)" style="border-radius:20px">Stockout</div>
+        <div class="tb-filter" onclick="toggleFilter(this)" style="border-radius:20px">Supplier</div>
+        <div class="tb-filter" onclick="toggleFilter(this)" style="border-radius:20px">Critical Only</div>
+      </div>
+      <div class="panel">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Type</th><th>Severity</th><th>Region</th><th>Description</th><th>Owner</th><th>SLA Remaining</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr style="background:#FFF5F5"><td>EX-001</td><td>Delay</td><td><span class="st st-high">High</span></td><td>Asia</td><td>SHP-2003 delayed 2 days — port congestion</td><td>L.Manager</td><td style="color:var(--red);font-weight:700">0.5h</td><td><span class="st st-prog">Active</span></td></tr>
+            <tr style="background:#FFF5F5"><td>EX-002</td><td>Stockout</td><td><span class="st st-high">High</span></td><td>N.Am</td><td>SKU_3 at WH_NY: 2 units vs 156 safety stock</td><td>Procurement</td><td style="color:var(--red);font-weight:700">2h</td><td><span class="st st-prog">Active</span></td></tr>
+            <tr style="background:#FFF5F5"><td>EX-003</td><td>Supplier</td><td><span class="st st-high">High</span></td><td>Global</td><td>SUP_B reliability at 70% — 12 SKUs impacted</td><td>SCM</td><td style="color:var(--red);font-weight:700">3h</td><td><span class="st st-pending">Pending</span></td></tr>
+            <tr style="background:#FFFDE7"><td>EX-004</td><td>Delay</td><td><span class="st st-med">Med</span></td><td>Europe</td><td>SHP-2007 transit delay — weather event Rotterdam</td><td>Logistics</td><td style="color:var(--yel);font-weight:700">6h</td><td><span class="st st-prog">Active</span></td></tr>
+            <tr style="background:#FFFDE7"><td>EX-005</td><td>Route</td><td><span class="st st-med">Med</span></td><td>Asia</td><td>WH_NY→Asia corridor congestion risk elevated</td><td>Planner</td><td style="color:var(--yel);font-weight:700">8h</td><td><span class="st st-pending">Pending</span></td></tr>
+            <tr><td>EX-006</td><td>Inventory</td><td><span class="st st-med">Med</span></td><td>N.Am</td><td>SKU_5 approaching reorder point at WH_NY</td><td>Planner</td><td style="color:var(--yel);font-weight:700">12h</td><td><span class="st st-pending">Pending</span></td></tr>
+            <tr><td>EX-007</td><td>Delay</td><td><span class="st st-low">Low</span></td><td>Europe</td><td>SHP-2012 minor 1-day delay at customs</td><td>L.Manager</td><td style="color:var(--grn);font-weight:700">24h</td><td><span class="st st-pending">Pending</span></td></tr>
+            <tr><td>EX-008</td><td>Supplier</td><td><span class="st st-low">Low</span></td><td>N.Am</td><td>SUP_A lead time increased by 1 day</td><td>Procurement</td><td style="color:var(--grn);font-weight:700">48h</td><td><span class="st st-pending">Pending</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- =========== OPS RISK =========== -->
+    <div class="page" id="page-ops-risk">
+      <div class="page-hd"><div class="page-hd-left"><h2>Risk Overview</h2><p>Supplier, route, and regional risk analysis with trends</p></div></div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Risk by Supplier</span></div><div style="height:190px"><canvas id="supRiskChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Risk by Route (Delay Probability)</span></div>
+          <div class="mm"><span class="mm-lbl">WH_NY → Asia (Sea)</span><span class="mm-val" style="color:var(--red)">88%</span></div>
+          <div class="rbar"><div class="rf rf-r" style="width:88%"></div></div>
+          <div class="mm" style="margin-top:10px"><span class="mm-lbl">WH_CA → Asia (Air)</span><span class="mm-val" style="color:var(--red)">74%</span></div>
+          <div class="rbar"><div class="rf rf-r" style="width:74%"></div></div>
+          <div class="mm" style="margin-top:10px"><span class="mm-lbl">WH_NY → Europe (Road)</span><span class="mm-val" style="color:var(--yel)">52%</span></div>
+          <div class="rbar"><div class="rf rf-y" style="width:52%"></div></div>
+          <div class="mm" style="margin-top:10px"><span class="mm-lbl">WH_TX → Asia (Road)</span><span class="mm-val" style="color:var(--grn)">18%</span></div>
+          <div class="rbar"><div class="rf rf-g" style="width:18%"></div></div>
+          <div class="mm" style="margin-top:10px"><span class="mm-lbl">WH_CA → Europe (Air)</span><span class="mm-val" style="color:var(--yel)">35%</span></div>
+          <div class="rbar"><div class="rf rf-y" style="width:35%"></div></div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-hd"><span class="panel-title">Risk Trend — Last 4 Weeks</span></div><div style="height:140px"><canvas id="riskTrendChart"></canvas></div></div>
+    </div>
+
+    <!-- =========== OPS SHIPMENTS =========== -->
+    <div class="page" id="page-ops-shipments">
+      <div class="page-hd"><div class="page-hd-left"><h2>Shipment Tracking</h2><p>Real-time status of all 100 active shipments from your dataset</p></div></div>
+      <div class="kpi-grid g3">
+        <div class="kpi green"><div class="kpi-label">On Time</div><div class="kpi-val">26</div><div class="kpi-sub neutral">26% of all shipments</div></div>
+        <div class="kpi blue"><div class="kpi-label">In Transit</div><div class="kpi-val">30</div><div class="kpi-sub neutral">30% of all shipments</div></div>
+        <div class="kpi red"><div class="kpi-label">Delayed</div><div class="kpi-val">44</div><div class="kpi-sub down">44% — action required</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-title">All Shipments — Sample (Live)</span></div>
+        <table class="tbl">
+          <thead><tr><th>Shipment ID</th><th>Order ID</th><th>Origin</th><th>Destination</th><th>Carrier</th><th>Mode</th><th>Planned ETA</th><th>AI Predicted</th><th>Status</th><th>Delay Reason</th></tr></thead>
+          <tbody>
+            <tr><td>2001</td><td>1091</td><td>WH_TX</td><td>Asia</td><td>Maersk</td><td>Road</td><td>Apr 8</td><td>Apr 8</td><td><span class="st st-ontime">On Time</span></td><td>—</td></tr>
+            <tr><td>2002</td><td>1007</td><td>WH_NY</td><td>Asia</td><td>UPS</td><td>Air</td><td>Apr 12</td><td>Apr 13</td><td><span class="st st-transit">In Transit</span></td><td>Minor congestion</td></tr>
+            <tr style="background:#FFF5F5"><td>2003</td><td>1095</td><td>WH_CA</td><td>Asia</td><td>UPS</td><td>Air</td><td>Apr 15</td><td style="color:var(--red)">Apr 17 (+2d)</td><td><span class="st st-delayed">Delayed</span></td><td>Port congestion</td></tr>
+            <tr style="background:#FFF5F5"><td>2004</td><td>1015</td><td>WH_CA</td><td>Asia</td><td>UPS</td><td>Sea</td><td>Apr 7</td><td style="color:var(--red)">Apr 8 (+1d)</td><td><span class="st st-delayed">Delayed</span></td><td>Customs delay</td></tr>
+            <tr><td>2005</td><td>1047</td><td>WH_NY</td><td>Europe</td><td>Maersk</td><td>Road</td><td>Apr 10</td><td>Apr 10</td><td><span class="st st-ontime">On Time</span></td><td>—</td></tr>
+            <tr style="background:#FFF5F5"><td>2006</td><td>1033</td><td>WH_TX</td><td>Europe</td><td>FedEx</td><td>Air</td><td>Apr 11</td><td style="color:var(--red)">Apr 14 (+3d)</td><td><span class="st st-delayed">Delayed</span></td><td>Weather event</td></tr>
+            <tr><td>2007</td><td>1062</td><td>WH_NY</td><td>Europe</td><td>DHL</td><td>Sea</td><td>Apr 18</td><td>Apr 19</td><td><span class="st st-transit">In Transit</span></td><td>—</td></tr>
+            <tr><td>2008</td><td>1078</td><td>WH_CA</td><td>N.Am</td><td>FedEx</td><td>Air</td><td>Apr 9</td><td>Apr 9</td><td><span class="st st-ontime">On Time</span></td><td>—</td></tr>
+            <tr style="background:#FFF5F5"><td>2009</td><td>1012</td><td>WH_NY</td><td>Asia</td><td>Maersk</td><td>Sea</td><td>Apr 13</td><td style="color:var(--red)">Apr 15 (+2d)</td><td><span class="st st-delayed">Delayed</span></td><td>Geopolitical event</td></tr>
+            <tr><td>2010</td><td>1055</td><td>WH_TX</td><td>N.Am</td><td>UPS</td><td>Road</td><td>Apr 8</td><td>Apr 8</td><td><span class="st st-ontime">On Time</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--txt3)">Showing 10 of 100 shipments · 44 delayed, 30 in transit, 26 on time</div>
+      </div>
+    </div>
+
+    <!-- =========== OPS ACTIONS =========== -->
+    <div class="page" id="page-ops-actions">
+      <div class="page-hd"><div class="page-hd-left"><h2>Action & Task Management</h2><p>AI-recommended and manually assigned supply chain actions</p></div></div>
+      <div class="row r2">
+        <div>
+          <div class="acard crit">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+              <div class="acard-title">Reroute 3 Asia shipments via air freight</div><span class="st st-pending">Pending</span>
+            </div>
+            <div class="acard-meta"><span class="atag">Reroute</span><span class="atag">Logistics Manager</span><span style="font-size:11px;color:var(--red);font-weight:600">$28K at risk</span></div>
+            <div style="margin-top:8px;font-size:11.5px;color:var(--txt2)">3 shipments impacted by Asia port congestion event. Switch from sea to air freight recommended to recover delivery schedule.</div>
+          </div>
+          <div class="acard crit">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+              <div class="acard-title">Switch SUP_B to SUP_D for all SKU_2 orders</div><span class="st st-pending">Pending</span>
+            </div>
+            <div class="acard-meta"><span class="atag">Switch Supplier</span><span class="atag">SCM Team</span><span style="font-size:11px;color:var(--red);font-weight:600">$41K at risk</span></div>
+            <div style="margin-top:8px;font-size:11.5px;color:var(--txt2)">SUP_B reliability dropped to 70%. SUP_D has 92% reliability and confirmed capacity. Requires VP approval.</div>
+          </div>
+          <div class="acard warn">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+              <div class="acard-title">Expedite reorder SKU_3 at WH_NY</div><span class="st st-prog">In Progress</span>
+            </div>
+            <div class="acard-meta"><span class="atag">Expedite Order</span><span class="atag">Procurement</span><span style="font-size:11px;color:var(--yel);font-weight:600">$8K premium cost</span></div>
+            <div style="margin-top:8px;font-size:11.5px;color:var(--txt2)">Current stock: 2 units vs 156 safety stock. Emergency order placed with SUP_A. ETA Apr 30.</div>
+          </div>
+          <div class="acard ok">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+              <div class="acard-title">Pre-position inventory at WH_LA</div><span class="st st-done">Completed</span>
+            </div>
+            <div class="acard-meta"><span class="atag">Inventory Move</span><span class="atag">Planner</span><span style="font-size:11px;color:var(--grn);font-weight:600">$12K saved</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Action Timeline</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-dot" style="background:var(--grn)"></div><div><div class="tl-title">WH_LA inventory repositioned · $12K saved</div><div class="tl-time">Apr 26, 2026 · Completed by Planner</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--p)"></div><div><div class="tl-title">Emergency reorder for SKU_3 placed with SUP_A</div><div class="tl-time">Apr 27, 2026 · In Progress — Procurement</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--yel)"></div><div><div class="tl-title">Asia rerouting analysis initiated — awaiting approval</div><div class="tl-time">Apr 28, 2026 · Pending — Logistics Manager</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--red)"></div><div><div class="tl-title">SUP_B to SUP_D switch request sent to VP</div><div class="tl-time">Apr 28, 2026 · Pending — SCM Team</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--txt3)"></div><div><div class="tl-title">WH_EU1 stock review scheduled</div><div class="tl-time">Apr 29, 2026 · Upcoming</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--txt3)"></div><div><div class="tl-title">Quarterly supplier risk review</div><div class="tl-time">May 2, 2026 · Upcoming</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== SUP FINANCE =========== -->
+    <div class="page" id="page-sup-finance">
+      <div class="page-hd"><div class="page-hd-left"><h2>Finance View</h2><p>Cost tracking, savings dashboard, and platform ROI</p></div><span class="page-hd-badge">Finance</span></div>
+      <div class="kpi-grid g4">
+        <div class="kpi purple"><div class="kpi-label">Total Cost MTD</div><div class="kpi-val">$89K</div><div class="kpi-sub up">↓ 4% vs $93K budget</div></div>
+        <div class="kpi red"><div class="kpi-label">Disruption Cost</div><div class="kpi-val">$47K</div><div class="kpi-sub down">↑ 28% vs prior period</div></div>
+        <div class="kpi green"><div class="kpi-label">AI Savings</div><div class="kpi-val">$23K</div><div class="kpi-sub up">From 4 completed actions</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Platform ROI</div><div class="kpi-val">3.2×</div><div class="kpi-sub up">↑ 0.4× month-on-month</div></div>
+      </div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Cost vs Budget by Category</span></div><div style="height:190px"><canvas id="supFinChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Savings Breakdown</span></div>
+          <table class="tbl"><thead><tr><th>Initiative</th><th>Savings</th><th>Category</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>WH_LA repositioning</td><td style="color:var(--grn);font-weight:700">$12K</td><td>Inventory</td><td><span class="st st-done">Realized</span></td></tr>
+            <tr><td>Route optimization</td><td style="color:var(--grn);font-weight:700">$7K</td><td>Logistics</td><td><span class="st st-done">Realized</span></td></tr>
+            <tr><td>Supplier switch SUP_D</td><td style="color:var(--p);font-weight:700">$41K</td><td>Procurement</td><td><span class="st st-pending">Projected</span></td></tr>
+            <tr><td>Asia air reroute avoided</td><td style="color:var(--p);font-weight:700">$28K</td><td>Logistics</td><td><span class="st st-pending">Projected</span></td></tr>
+          </tbody></table>
+          <div style="margin-top:14px;padding:12px;background:var(--grnl);border-radius:8px;text-align:center">
+            <div style="font-size:11px;color:var(--grn);font-weight:700;margin-bottom:4px">Total Projected Savings</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--grn)">$88K</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== SUP CS =========== -->
+    <div class="page" id="page-sup-cs">
+      <div class="page-hd"><div class="page-hd-left"><h2>Customer Service View</h2><p>Order status, delay notifications, and customer communication tracking</p></div><span class="page-hd-badge">Customer Service</span></div>
+      <div class="kpi-grid g3">
+        <div class="kpi green"><div class="kpi-label">Orders On Track</div><div class="kpi-val">56</div><div class="kpi-sub neutral">56% of total 100 orders</div></div>
+        <div class="kpi red"><div class="kpi-label">Delay Notifications</div><div class="kpi-val">44</div><div class="kpi-sub down">Customers to be contacted</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Avg Delay (days)</div><div class="kpi-val">1.8</div><div class="kpi-sub neutral">Across all delayed orders</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-title">Orders Requiring Customer Communication</span></div>
+        <table class="tbl">
+          <thead><tr><th>Order ID</th><th>SKU</th><th>Region</th><th>Qty</th><th>Required By</th><th>Delay</th><th>Priority</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr style="background:#FFF5F5"><td>1095</td><td>SKU_14</td><td>Asia</td><td>248</td><td>Apr 16</td><td style="color:var(--red);font-weight:700">+2 days</td><td><span class="st st-high">High</span></td><td><span style="color:var(--p);cursor:pointer;font-size:11px;font-weight:700">Notify Customer →</span></td></tr>
+            <tr style="background:#FFF5F5"><td>1015</td><td>SKU_16</td><td>Asia</td><td>294</td><td>Apr 10</td><td style="color:var(--red);font-weight:700">+1 day</td><td><span class="st st-high">High</span></td><td><span style="color:var(--p);cursor:pointer;font-size:11px;font-weight:700">Notify Customer →</span></td></tr>
+            <tr style="background:#FFFDE7"><td>1033</td><td>SKU_8</td><td>Europe</td><td>180</td><td>Apr 13</td><td style="color:var(--yel);font-weight:700">+3 days</td><td><span class="st st-med">Med</span></td><td><span style="color:var(--p);cursor:pointer;font-size:11px;font-weight:700">Notify Customer →</span></td></tr>
+            <tr><td>1002</td><td>SKU_18</td><td>Asia</td><td>328</td><td>Apr 14</td><td style="color:var(--yel);font-weight:700">+1 day</td><td><span class="st st-med">Med</span></td><td><span style="color:var(--p);cursor:pointer;font-size:11px;font-weight:700">Draft Message →</span></td></tr>
+            <tr><td>1003</td><td>SKU_28</td><td>Europe</td><td>27</td><td>Apr 16</td><td style="color:var(--grn);font-weight:700">On track</td><td><span class="st st-low">Low</span></td><td><span style="color:var(--txt3);font-size:11px">No action needed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row r2" style="margin-top:14px">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Delay Distribution by Region</span></div><div style="height:150px"><canvas id="csDelayChart"></canvas></div></div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Order Priority Breakdown</span></div><div style="height:150px"><canvas id="csPriorityChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- =========== SUP OVERVIEW =========== -->
+    <div class="page" id="page-sup-overview">
+      <div class="page-hd"><div class="page-hd-left"><h2>Support Overview</h2><p>Cross-functional performance, issue tracking, and team metrics</p></div><span class="page-hd-badge">Support</span></div>
+      <div class="kpi-grid g4">
+        <div class="kpi purple"><div class="kpi-label">Open Issues</div><div class="kpi-val">23</div><div class="kpi-sub down">↑ 5 from yesterday</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Escalations</div><div class="kpi-val">7</div><div class="kpi-sub neutral">2 require exec approval</div></div>
+        <div class="kpi green"><div class="kpi-label">Resolved Today</div><div class="kpi-val">11</div><div class="kpi-sub up">↑ 4 vs yesterday</div></div>
+        <div class="kpi blue"><div class="kpi-label">Avg Close Time</div><div class="kpi-val">5.4h</div><div class="kpi-sub up">↓ 1.2h vs last week</div></div>
+      </div>
+      <div class="row r2">
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Team Performance</span></div>
+          <table class="tbl"><thead><tr><th>Team</th><th>Open Issues</th><th>Resolved</th><th>SLA %</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Logistics</td><td>8</td><td>14</td><td style="color:var(--grn);font-weight:700">91%</td><td><span class="st st-ontime">Good</span></td></tr>
+            <tr><td>Procurement</td><td>5</td><td>9</td><td style="color:var(--yel);font-weight:700">78%</td><td><span class="st st-med">Watch</span></td></tr>
+            <tr><td>Finance</td><td>4</td><td>6</td><td style="color:var(--grn);font-weight:700">85%</td><td><span class="st st-ontime">Good</span></td></tr>
+            <tr><td>Customer Svc</td><td>6</td><td>3</td><td style="color:var(--red);font-weight:700">54%</td><td><span class="st st-high">Critical</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel"><div class="panel-hd"><span class="panel-title">Issue Trend — Last 7 Days</span></div><div style="height:170px"><canvas id="issueTrendChart"></canvas></div></div>
+      </div>
+      <div class="panel"><div class="panel-hd"><span class="panel-title">Cross-Team Visibility — Active Escalations</span></div>
+        <table class="tbl"><thead><tr><th>Issue</th><th>Raised By</th><th>Assigned To</th><th>Days Open</th><th>Priority</th></tr></thead>
+        <tbody>
+          <tr><td>SUP_B supplier switch needs VP approval</td><td>SCM</td><td>Executive</td><td style="color:var(--red);font-weight:700">2</td><td><span class="st st-high">High</span></td></tr>
+          <tr><td>Asia route rerouting budget approval</td><td>Logistics</td><td>CFO</td><td style="color:var(--yel);font-weight:700">1</td><td><span class="st st-high">High</span></td></tr>
+          <tr><td>WH_EU1 capacity expansion plan</td><td>Operations</td><td>COO</td><td style="color:var(--yel);font-weight:700">5</td><td><span class="st st-med">Med</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const P='#6A1B9A',ACC='#E91E8C',RED='#D32F2F',YEL='#F57C00',GRN='#2E7D32',BLU='#1565C0';
+const REDF='rgba(211,47,47,0.12)',YELF='rgba(245,124,0,0.1)',GRNF='rgba(46,125,50,0.1)',PF='rgba(106,27,154,0.1)',BLUF='rgba(21,101,192,0.1)';
+const BASE={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#9B8DAA'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#9B8DAA'}}}};
+function mk(id,cfg){const el=document.getElementById(id);if(el&&!el._chart){const c=new Chart(el,cfg);el._chart=c}}
+let inited=false;
+function initCharts(){
+  if(inited)return;inited=true;
+  mk('riskRegionChart',{type:'bar',data:{labels:['North America','Europe','Asia'],datasets:[{data:[8,14,22],backgroundColor:[YEL,RED,RED+'EE'],borderRadius:5}]},options:{...BASE}});
+  mk('finImpactChart',{type:'bar',data:{labels:['Disruption','Premium Freight','Savings','At Risk'],datasets:[{data:[47,19.6,-23,214],backgroundColor:[RED+'CC',YEL+'CC',GRN+'CC',RED+'55'],borderRadius:5}]},options:{...BASE}});
+  mk('otifTrend',{type:'line',data:{labels:['Wk1','Wk2','Wk3','Wk4','Now'],datasets:[{data:[74,70,65,59,56],borderColor:P,backgroundColor:PF,fill:true,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:P}]},options:{...BASE}});
+  mk('excTrend',{type:'line',data:{labels:['Wk1','Wk2','Wk3','Wk4','Now'],datasets:[{data:[28,32,38,41,44],borderColor:RED,backgroundColor:REDF,fill:true,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:RED}]},options:{...BASE}});
+  mk('costTrend',{type:'line',data:{labels:['Wk1','Wk2','Wk3','Wk4','Now'],datasets:[{data:[78,82,88,91,89],borderColor:YEL,backgroundColor:YELF,fill:true,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:YEL}]},options:{...BASE}});
+  mk('costBreakChart',{type:'bar',data:{labels:['Std Freight','Prem Freight','Handling','Storage','Customs'],datasets:[{label:'Actual',data:[42,19.6,11,9,7.4],backgroundColor:P+'CC',borderRadius:4},{label:'Budget',data:[45,12,12,10,8],backgroundColor:'rgba(180,180,180,0.45)',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('actionCompChart',{type:'bar',data:{labels:['With AI Action','Without Action'],datasets:[{data:[47,89],backgroundColor:[GRN+'CC',RED+'CC'],borderRadius:6}]},options:{...BASE,indexAxis:'y',scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#9B8DAA'}},y:{grid:{display:false},ticks:{font:{size:10},color:'#9B8DAA'}}}}});
+  mk('costTrendLong',{type:'line',data:{labels:['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8'],datasets:[{label:'Total Cost($K)',data:[72,75,80,83,88,91,89,89],borderColor:P,fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:P},{label:'Disruption($K)',data:[18,22,28,32,40,44,47,47],borderColor:RED,fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:RED,borderDash:[5,4]}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('excTypeChart',{type:'doughnut',data:{labels:['Delay (44)','Stockout (12)','Supplier (10)','Route (8)','Other (6)'],datasets:[{data:[44,12,10,8,6],backgroundColor:[RED,YEL,P,BLU,GRN],borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},color:'#6B5B7A',padding:8,boxWidth:10}}}}});
+  mk('resTimeChart',{type:'bar',data:{labels:['Delay','Stockout','Supplier','Route','Other'],datasets:[{data:[4.2,6.1,3.8,2.9,1.4],backgroundColor:[RED+'CC',YEL+'CC',P+'CC',BLU+'CC',GRN+'CC'],borderRadius:4}]},options:{...BASE,scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#9B8DAA'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#9B8DAA'}}}}});
+  mk('delayProbChart',{type:'bar',data:{labels:['WH_NY→Asia','WH_CA→Asia','WH_NY→EU','WH_CA→EU','WH_TX→Asia'],datasets:[{data:[88,74,52,35,18],backgroundColor:[RED,RED,YEL,YEL,GRN],borderRadius:4}]},options:{...BASE,indexAxis:'y',scales:{x:{max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#9B8DAA'}},y:{grid:{display:false},ticks:{font:{size:10},color:'#9B8DAA'}}}}});
+  mk('invRiskChart',{type:'line',data:{labels:['Apr28','Apr29','Apr30','May1','May2','May3','May4','May5','May6','May7','May8','May9','May10','May11'],datasets:[{label:'High Risk SKUs',data:[8,9,10,11,10,12,14,13,15,14,12,10,9,8],borderColor:RED,backgroundColor:REDF,fill:true,tension:0.4,borderWidth:2,pointRadius:2,pointBackgroundColor:RED},{label:'Medium Risk',data:[12,13,12,14,15,13,12,14,16,15,13,12,11,10],borderColor:YEL,backgroundColor:YELF,fill:false,tension:0.4,borderWidth:2,pointRadius:2,pointBackgroundColor:YEL,borderDash:[4,3]}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('supRiskChart',{type:'bar',data:{labels:['SUP_A','SUP_B','SUP_C','SUP_D','SUP_E'],datasets:[{label:'High Risk SKUs',data:[5,14,11,2,1],backgroundColor:RED+'CC',borderRadius:4},{label:'Medium Risk SKUs',data:[8,3,7,4,3],backgroundColor:YEL+'CC',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},color:'#9B8DAA'}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#9B8DAA'}}}}});
+  mk('riskTrendChart',{type:'line',data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{label:'High Risk',data:[28,33,38,40],borderColor:RED,backgroundColor:REDF,fill:true,tension:0.4,borderWidth:2,pointRadius:4,pointBackgroundColor:RED},{label:'Medium Risk',data:[15,18,22,35],borderColor:YEL,fill:false,tension:0.4,borderWidth:2,pointRadius:4,pointBackgroundColor:YEL,borderDash:[4,3]}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('supFinChart',{type:'bar',data:{labels:['Freight','Disruption','Handling','Storage'],datasets:[{label:'Actual ($K)',data:[61.6,47,11,9],backgroundColor:P+'CC',borderRadius:4},{label:'Budget ($K)',data:[57,37,12,10],backgroundColor:'rgba(180,180,180,0.4)',borderRadius:4}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('issueTrendChart',{type:'line',data:{labels:['Apr22','Apr23','Apr24','Apr25','Apr26','Apr27','Apr28'],datasets:[{label:'Issues Opened',data:[18,22,19,25,21,18,23],borderColor:RED,fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:RED},{label:'Resolved',data:[20,18,22,16,19,22,11],borderColor:GRN,fill:false,tension:0.4,borderWidth:2,pointRadius:3,pointBackgroundColor:GRN,borderDash:[4,3]}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('csDelayChart',{type:'bar',data:{labels:['N. America','Europe','Asia'],datasets:[{label:'Delayed Orders',data:[13,17,14],backgroundColor:[YEL,RED,RED+'CC'],borderRadius:4},{label:'On Time',data:[18,15,23],backgroundColor:[GRN+'66',GRN+'88',GRN+'AA'],borderRadius:4}]},options:{...BASE,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#6B5B7A',boxWidth:10,padding:8}}}}});
+  mk('csPriorityChart',{type:'doughnut',data:{labels:['High Priority (41)','Medium Priority (35)','Low Priority (24)'],datasets:[{data:[41,35,24],backgroundColor:[RED,YEL,GRN],borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},color:'#6B5B7A',padding:6,boxWidth:10}}}}});
+}
+
+const titles={landing:'AI Control Tower','exec-main':'Executive Dashboard','exec-global':'Global Supply Chain','exec-finance':'Financial Impact (CFO)','exec-ops':'Ops Performance (COO)','exec-predict':'Predictive Insights (CSCO)','ops-main':'Operations Control Panel','ops-exceptions':'Exception Management','ops-risk':'Risk Overview','ops-shipments':'Shipment Tracking','ops-actions':'Action Management','sup-finance':'Finance View','sup-cs':'Customer Service','sup-overview':'Support Overview'};
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  const nb=document.getElementById('nav-'+id);
+  if(pg)pg.classList.add('active');
+  if(nb)nb.classList.add('active');
+  document.getElementById('tb-title').textContent=titles[id]||'Control Tower';
+  document.getElementById('content').scrollTop=0;
+  if(id!=='landing')setTimeout(initCharts,80);
+}
+
+function selectPersona(p){
+  ['exec-nav','ops-nav','sup-nav'].forEach(n=>document.getElementById(n).style.display='none');
+  if(p==='exec'){document.getElementById('exec-nav').style.display='block';showPage('exec-main');}
+  else if(p==='ops'){document.getElementById('ops-nav').style.display='block';showPage('ops-main');}
+  else{document.getElementById('sup-nav').style.display='block';showPage('sup-finance');}
+}
+
+function toggleFilter(el){
+  document.querySelectorAll('.tb-filter').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+
+<input id="shipment-id">
+
+<select id="status">
+  <option>On Time</option>
+  <option>Delayed</option>
+</select>
+
+<button onclick="updateShipment()">
+  Update
+</button>
+</body>
+
+<script>
+
+const API_URL =
+"https://YOUR-APPS-SCRIPT-URL/exec";
+
+async function loadDashboardData() {
+
+  try {
+
+    const response = await fetch(API_URL);
+
+    const data = await response.json();
+
+    console.log(data);
+
+    const delayedShipments =
+      data.filter(
+        shipment =>
+          shipment.Status === "Delayed"
+      ).length;
+
+    document.getElementById(
+      "delayed-count"
+    ).innerText = delayedShipments;
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+  }
+
+}
+
+loadDashboardData();
+
+</script>
+
+</html>
